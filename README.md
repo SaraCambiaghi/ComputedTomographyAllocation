@@ -16,8 +16,13 @@ It provides a toy example demonstrating how predictions made with machine learni
 1. Download and install Docker Desktop:  
    👉 [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
 
-2. Build the Docker image:  
-   Start Docker Desktop, open your terminal, and run:
+2. Clone the repository: from the terminal, run
+   ```bash
+   git clone https://github.com/tuo-username/nome-repo.git
+or download this folder as a ZIP file and unzip it
+
+4. Build the Docker image:  
+  Start Docker Desktop, open your terminal, navigate to the downloaded folder, and run:
    ```bash
    docker build -t my-app .
 (You can replace my-app with any name you prefer for the image.)
