@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Workload Optimization Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+        }
+
+        .disclaimer {
+            background-color: #fcf8e3;
+            border-left: 6px solid #faebcc;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.95em;
+            color: #8a6d3b;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #ecf0f1;
+        }
+
+        .z-value {
+            background-color: #d9edf7;
+            border: 1px solid #bce8f1;
+            padding: 15px;
+            margin-top: 30px;
+            width: fit-content;
+        }
+
+        .schedule-comparison {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .schedule-table {
+            flex: 1;
+        }
+
+        .schedule-table h2 {
+            text-align: center;
+        }
+
+        .confronto-final {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            padding: 20px;
+            margin-top: 40px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .confronto-final strong {
+            color: #3c763d;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Workload Optimization Using Machine Learning</h1>
+
+    <div class="disclaimer">
+        <strong>Disclaimer:</strong> This is a simplified version of the machine learning algorithm. The model has been trained on data specific to Policlinico San Matteo, so its performance might be lower than what could be achieved in real-world applications.
+    </div>
+
+    {% if predizioni is not none %}
+        <h2>Predicted Durations (CatBoost Model)</h2>
+        <table>
+            <tr>
+                <th>Patient</th>
+                <th>Predicted Duration</th>
+            </tr>
+            {% for i in range(predizioni|length) %}
+            <tr>
+                <td>{{ i }}</td>
+                <td>{{ "%.2f"|format(predizioni[i]) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <<div class="schedule-comparison">
+    {% set days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] %}
+
+    {% if random_result is not none %}
+    <div class="schedule-table">
+        <div class="z-value">
+            <strong>Even Day-by-Day Method – Maximum Expected Daily Workload (Based on Historical Average):</strong><br>
+            {{ "%.2f"|format(random_result.z) }}
+        </div>
+
+        <h2>Even Day-by-Day Assignment</h2>
+        <table>
+            <tr>
+                <th>Patient</th>
+                <th>Assigned Day</th>
+            </tr>
+            {% for i, j in random_result.assignments|sort(attribute=1) %}
+            <tr>
+                <td>{{ i }}</td>
+                <td>{{ days[j] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+
+
+    {% if result is not none %}
+    <div class="schedule-table">
+        <div class="z-value">
+            <strong>Optimized Method – Maximum Expected Daily Workload (Based on CatBoost Predictions):</strong><br>
+            {{ "%.2f"|format(result.z) }}
+        </div>
+
+        <h2>Optimized Assignment</h2>
+        <table>
+            <tr>
+                <th>Patient</th>
+                <th>Assigned Day</th>
+            </tr>
+            {% for i, j in result.assignments %}
+            <tr>
+                <td>{{ i }}</td>
+                <td>{{ days[j] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+
+    {% if employ_old is not none and employ_opt is not none %}
+    {% if employ_opt <= employ_old %}
+        <div class="confronto-final">
+            <strong>Final Comparison (Using Actual Durations from Monte Carlo Sampling):</strong><br><br>
+            Using the <u>classic method</u>, the average maximum daily workload over 100 scenarios is: <strong>{{ "%.2f"|format(employ_old) }}</strong><br>
+            Using the <u>optimized method</u>, the average maximum daily workload over 100 scenarios is: <strong>{{ "%.2f"|format(employ_opt) }}</strong><br><br>
+            This shows how predictions can help balance workloads!
+        </div>
+    {% else %}
+        <div class="confronto-final" style="background-color: #fbeaea; border-left: 6px solid #e74c3c; color: #a94442; padding: 15px; margin-top: 20px;">
+            <strong>Note:</strong><br>
+            In this case, the optimized method did not outperform the classic method.<br>
+            This may happen due to data variability or limitations in the simplified machine learning algorithm, as this is a toy example and not the full optimization model.<br>
+            Consider testing with different patient configurations and ensure that the input features provided to the algorithm are coherent and realistic — otherwise, it may fail to find an effective schedule.
+        </div>
+    {% endif %}
+{% endif %}
+
+
+</body>
+</html>
+
+
+

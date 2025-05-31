@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CT Exam Scheduling</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .disclaimer {
+      background-color: #fcf8e3;
+      border-left: 6px solid #faebcc;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 0.95em;
+      color: #8a6d3b;
+    }
+
+    .patient-form {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>CT Exam Scheduling</h2>
+
+    <form id="patientsForm" method="POST" action="#">
+      <label for="numPatients">How many patients do you want to schedule? (to appreciate how it works, we recommend choosing a number between 15 and 100):</label>
+      <input type="number" id="numPatients" name="numPazienti" min="1" max="100">
+
+      <label for="durationCriterion">Balancing criterion:</label>
+      <select id="durationCriterion" name="criterioDurata">
+        <option value="esami">Exam duration</option>
+        <option value="refertazione">Reporting duration</option>
+      </select>
+
+      <button type="button" onclick="generateForm()">Continue</button>
+
+      <div id="formContainer"></div>
+
+      <div class="disclaimer" id="submitDisclaimer" style="display:none;">
+      The algorithm may take a few seconds to process the data and compute the schedule. Please wait until the page refreshes automatically.
+    </div>
+
+      <button type="submit" style="display:none" id="submitBtn">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const departments = [
+      { it: 'ACCETTAZIONE P.S.', en: 'ER Reception' },
+      { it: 'STROKE UNIT DEGENTI', en: 'Stroke Unit (Inpatients)' },
+      { it: 'ALTRO', en: 'Other' },
+      { it: 'ANESTESIA E RIANIMAZIONE 1  DEGENTI', en: 'Anesthesia and ICU 1 (Inpatients)' },
+      { it: 'MALATTIE INFETTIVE TROPICALI DEGENTI', en: 'Infectious and Tropical Diseases (Inpatients)' },
+      { it: 'NEUROCHIRURGIA DEGENTI', en: 'Neurosurgery (Inpatients)' },
+      { it: 'MEDICINA GENERALE 2 DEGENTI', en: 'General Medicine 2 (Inpatients)' },
+      { it: 'CHIRURGIA GENERALE 1 DEG. A', en: 'General Surgery 1A (Inpatients)' },
+      { it: 'AMBULATORIO', en: 'Outpatient Clinic' },
+      { it: 'MEDICINA GENERALE 1 DEGENTI', en: 'General Medicine 1 (Inpatients)' }
+    ];
+
+    const exams = [
+      { it: 'TC CEREBRALE (SENZA MDC)', en: 'Brain CT (Without Contrast)' },
+      { it: 'TC COLONNA LOMBO-SACRALE (SENZA MDC)', en: 'Lumbosacral Spine CT (Without Contrast)' },
+      { it: 'TC COLONNA CERVICALE (SENZA MDC)', en: 'Cervical Spine CT (Without Contrast)' },
+      { it: 'TC CRANIO (SENZA MDC) _SELLA TURCICA, ORBITE_', en: 'Skull CT (Without Contrast) - Sella/Orbits' },
+      { it: 'TC TORACE (SENZA MDC)', en: 'Chest CT (Without Contrast)' },
+      { it: 'TC GOMITO/AVAMBRACCIO DX (SENZA MDC)', en: 'Elbow/Forearm CT Right (Without Contrast)' },
+      { it: 'TC MASSICCIO FACCIALE (SENZA MDC)', en: 'Facial Bones CT (Without Contrast)' },
+      { it: 'TC ADDOME COMPLETO (SENZA E CON MDC)', en: 'Full Abdomen CT (With and Without Contrast)' },
+      { it: 'ANGIO-TC TRONCHI SOVRAORTICI', en: 'Angio-CT of Supra-Aortic Trunks' },
+      { it: 'ANGIO-TC INTRACRANICO', en: 'Intracranial Angio-CT' },
+      { it: 'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)', en: 'Pelvis and Sacroiliac Joints CT (Without Contrast)' },
+      { it: 'ANGIO-TC ARTO INFERIORE DX', en: 'Lower Limb Angio-CT Right' },
+      { it: 'ANGIO-TC ARTO INFERIORE SX', en: 'Lower Limb Angio-CT Left' },
+      { it: 'TC CEREBRALE (SENZA E CON MDC)', en: 'Brain CT (With and Without Contrast)' },
+      { it: 'TC TORACE (SENZA E CON MDC)', en: 'Chest CT (With and Without Contrast)' },
+      { it: 'TC ADDOME COMPLETO (SENZA MDC)', en: 'Full Abdomen CT (Without Contrast)' },
+      { it: 'TC COLLO (SENZA E CON MDC)', en: 'Neck CT (With and Without Contrast)' },
+      { it: 'TC COLONNA DORSALE (SENZA MDC)', en: 'Thoracic Spine CT (Without Contrast)' },
+      { it: 'OTHER_EXAMS', en: 'Other exams' }
+    ];
+
+    function generateForm() {
+      const n = parseInt(document.getElementById('numPatients').value);
+      if (!n || n < 1 || n > 100) {
+        alert('Please enter a valid number of patients (1–100)');
+        return;
+      }
+
+      const container = document.getElementById('formContainer');
+      container.innerHTML = ''; // Clear previous forms
+
+      for (let i = 0; i < n; i++) {
+        const div = document.createElement('div');
+        div.className = 'patient-form';
+        div.innerHTML = `
+          <h3>Patient ${i + 1}</h3>
+
+          <label>Gender:</label>
+          <select name="pazienti[${i}][sesso]">
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+            <option value="-1">Unspecified</option>
+          </select>
+
+          <label>Department:</label>
+          <select name="pazienti[${i}][dipartimento]">
+            ${departments.map(dep => `<option value="${dep.it}">${dep.en}</option>`).join('')}
+          </select>
+
+          <label>Scan Type:</label>
+          <select name="pazienti[${i}][tipo]">
+            <option value="1">Body</option>
+            <option value="0">Neuro</option>
+          </select>
+
+          <label>Exams:</label>
+          <select name="pazienti[${i}][esami][]" multiple>
+            ${exams.map(ex => `<option value="${ex.it}">${ex.en}</option>`).join('')}
+          </select>
+
+          <label>Age:</label>
+          <input type="number" name="pazienti[${i}][eta]" min="0" required>
+
+          <label>Number of exams:</label>
+          <input type="number" name="pazienti[${i}][numero_esami]" min="1" required>
+        `;
+        container.appendChild(div);
+      }
+
+      // Show the submit button
+      document.getElementById('submitBtn').style.display = 'inline-block';
+      document.getElementById('submitDisclaimer').style.display = 'block';
+
+    }
+
+  </script>
+</body>
+</html>

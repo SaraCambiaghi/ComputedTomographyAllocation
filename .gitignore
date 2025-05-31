@@ -1,0 +1,22 @@
+# Ambiente Conda/venv
+env/
+venv/
+.conda/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# File ambiente
+.env
+
+# File editor
+.vscode/
+.DS_Store
+*.swp
+
+# Notebook temporanei
+*.ipynb_checkpoints
+
+# Database o file locali
+*.sqlite3
