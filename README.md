@@ -18,7 +18,7 @@ It provides a toy example demonstrating how predictions made with machine learni
 
 2. Clone the repository: from the terminal, run
    ```bash
-   git clone https://github.com/tuo-username/nome-repo.git
+   git clone https://github.com/SaraCambiaghi/ComputerTomographyAllocation.git
 or download this folder as a ZIP file and unzip it
 
 4. Build the Docker image:  
