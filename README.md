@@ -29,5 +29,8 @@ It provides a toy example demonstrating how predictions made with machine learni
    
    👉 [http://localhost:5000](http://localhost:5000)
 
+## Alternatively, to try the tool directly:
+go to 👉 [https://computedtomographyallocation.onrender.com](https://computedtomographyallocation.onrender.com)
+
 
 
