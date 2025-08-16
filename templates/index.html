@@ -1,187 +1,1140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CT Exam Scheduling</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      margin: 0;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <title>CT Exam Scheduling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .disclaimer {
-      background-color: #fcf8e3;
-      border-left: 6px solid #faebcc;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 0.95em;
-      color: #8a6d3b;
-    }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
 
-    .patient-form {
-      border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      background-color: #f9f9f9;
-    }
+        h2 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    label {
-      display: block;
-      margin-top: 10px;
-    }
+        h3 {
+            color: #34495e;
+            margin: 20px 0 15px;
+            font-size: 1.3em;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
 
-    select, input[type="number"] {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
+        .disclaimer {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            font-size: 0.95em;
+            color: #856404;
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+            border-left: 5px solid #ffc107;
+        }
 
-    button {
-      margin-top: 20px;
-      padding: 12px 24px;
-      background-color: #0077cc;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+        .info-box {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            font-size: 0.95em;
+            color: #155724;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+            border-left: 5px solid #28a745;
+        }
 
-    button:hover {
-      background-color: #005fa3;
-    }
-  </style>
+        .patient-form {
+            background: white;
+            border: none;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .patient-form:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            margin-top: 5px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .exam-category {
+            margin: 20px 0;
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .category-header {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exam-checkbox {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .exam-checkbox:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+
+        .exam-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .exam-checkbox label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            color: #495057;
+            line-height: 1.4;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 14px 28px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        .validation-error {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        input[readonly] {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Form controls styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .main-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #28a745;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+
+        /* Enhanced styling for specific elements */
+        #autoGenerateInfo {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Loading state */
+        .loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
+    <div class="container fade-in">
+        <h2>CT Exam Scheduling</h2>
 
-  <div class="container">
-    <h2>CT Exam Scheduling</h2>
+        <form id="patientsForm" method="POST" action="#" onsubmit="return validateForm()">
+            <div class="main-controls">
+                <label for="numPatients">Please specify the number of patients to be scheduled (between 15 and 100):</label>
+                <input type="number" id="numPatients" name="numPazienti" min="15" max="100" value="20">
 
-    <form id="patientsForm" method="POST" action="#">
-      <label for="numPatients">How many patients do you want to schedule? (to appreciate how it works, we recommend choosing a number between 15 and 100):</label>
-      <input type="number" id="numPatients" name="numPazienti" min="1" max="100">
+                <label for="durationCriterion">Please specify the balancing criterion:</label>
+                <select id="durationCriterion" name="criterioDurata">
+                    <option value="esami">Exam duration</option>
+                    <option value="refertazione">Reporting duration</option>
+                </select>
 
-      <label for="durationCriterion">Balancing criterion:</label>
-      <select id="durationCriterion" name="criterioDurata">
-        <option value="esami">Exam duration</option>
-        <option value="refertazione">Reporting duration</option>
-      </select>
+                <button type="button" onclick="generateForm()">Generate Patients</button>
+            </div>
 
-      <button type="button" onclick="generateForm()">Continue</button>
+            <div class="info-box fade-in" id="autoGenerateInfo" style="display:none;">
+                <strong>Auto-generated patients:</strong> Patient records have been automatically generated using realistic data derived from our dataset. All fields may be modified as necessary prior to submission; however, please ensure that the data remains realistic to allow the tool to function correctly.
+            </div>
 
-      <div id="formContainer"></div>
+            <div class="button-group fade-in" id="actionButtons" style="display:none;">
+                <button type="button" onclick="regeneratePatients()" class="btn-secondary">Regenerate All Patients</button>
+            </div>
 
-      <div class="disclaimer" id="submitDisclaimer" style="display:none;">
-      The algorithm may take a few seconds to process the data and compute the schedule. Please wait until the page refreshes automatically.
+            <div id="formContainer"></div>
+
+            <div class="disclaimer fade-in" id="submitDisclaimer" style="display:none;">
+                The algorithm may take a few seconds to process the data and compute the schedule. Please wait until the page refreshes automatically.
+            </div>
+
+            <button type="submit" style="display:none" id="submitBtn">Submit Schedule</button>
+        </form>
     </div>
 
-      <button type="submit" style="display:none" id="submitBtn">Submit</button>
-    </form>
-  </div>
+    <script>
+        const PYTHON_EXAMS_LIST = [
+            'TC CEREBRALE (SENZA MDC)',
+            'TC CEREBRALE (SENZA E CON MDC)',
+            'TC CRANIO (SENZA MDC) SELLA TURCICA, ORBITE',
+            'TC MASSICCIO FACCIALE (SENZA MDC)',
+            'ANGIO-TC INTRACRANICO',
+            'TC COLONNA CERVICALE (SENZA MDC)',
+            'TC COLONNA DORSALE (SENZA MDC)',
+            'TC COLONNA LOMBO-SACRALE (SENZA MDC)',
+            'TC COLLO (SENZA E CON MDC)',
+            'ANGIO-TC TRONCHI SOVRAORTICI',
+            'TC TORACE (SENZA MDC)',
+            'TC TORACE (SENZA E CON MDC)',
+            'TC ADDOME COMPLETO (SENZA MDC)',
+            'TC ADDOME COMPLETO (SENZA E CON MDC)',
+            'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+            'TC GOMITO/AVAMBRACCIO DX (SENZA MDC)',
+            'ANGIO-TC ARTO INFERIORE DX',
+            'ANGIO-TC ARTO INFERIORE SX',
+            'OTHER_EXAMS'
+        ];
 
-  <script>
-    const departments = [
-      { it: 'ACCETTAZIONE P.S.', en: 'ER Reception' },
-      { it: 'STROKE UNIT DEGENTI', en: 'Stroke Unit (Inpatients)' },
-      { it: 'ALTRO', en: 'Other' },
-      { it: 'ANESTESIA E RIANIMAZIONE 1  DEGENTI', en: 'Anesthesia and ICU 1 (Inpatients)' },
-      { it: 'MALATTIE INFETTIVE TROPICALI DEGENTI', en: 'Infectious and Tropical Diseases (Inpatients)' },
-      { it: 'NEUROCHIRURGIA DEGENTI', en: 'Neurosurgery (Inpatients)' },
-      { it: 'MEDICINA GENERALE 2 DEGENTI', en: 'General Medicine 2 (Inpatients)' },
-      { it: 'CHIRURGIA GENERALE 1 DEG. A', en: 'General Surgery 1A (Inpatients)' },
-      { it: 'AMBULATORIO', en: 'Outpatient Clinic' },
-      { it: 'MEDICINA GENERALE 1 DEGENTI', en: 'General Medicine 1 (Inpatients)' }
-    ];
+        const EXAM_TRANSLATIONS = {
+            'TC CEREBRALE (SENZA MDC)': 'Brain CT (Without Contrast)',
+            'TC CEREBRALE (SENZA E CON MDC)': 'Brain CT (With and Without Contrast)',
+            'TC CRANIO (SENZA MDC) SELLA TURCICA, ORBITE': 'Skull CT (Without Contrast) – Sella Turcica, Orbits',
+            'TC MASSICCIO FACCIALE (SENZA MDC)': 'Facial Bones CT (Without Contrast)',
+            'ANGIO-TC INTRACRANICO': 'Intracranial CT Angiography',
+            'TC COLONNA CERVICALE (SENZA MDC)': 'Cervical Spine CT (Without Contrast)',
+            'TC COLONNA DORSALE (SENZA MDC)': 'Thoracic Spine CT (Without Contrast)',
+            'TC COLONNA LOMBO-SACRALE (SENZA MDC)': 'Lumbosacral Spine CT (Without Contrast)',
+            'TC COLLO (SENZA E CON MDC)': 'Neck CT (With and Without Contrast)',
+            'ANGIO-TC TRONCHI SOVRAORTICI': 'CT Angiography of the Supra-Aortic Trunks',
+            'TC TORACE (SENZA MDC)': 'Chest CT (Without Contrast)',
+            'TC TORACE (SENZA E CON MDC)': 'Chest CT (With and Without Contrast)',
+            'TC ADDOME COMPLETO (SENZA MDC)': 'Complete Abdominal CT (Without Contrast)',
+            'TC ADDOME COMPLETO (SENZA E CON MDC)': 'Complete Abdominal CT (With and Without Contrast)',
+            'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)': 'Pelvis and Sacroiliac Joints CT (Without Contrast)',
+            'TC GOMITO/AVAMBRACCIO DX (SENZA MDC)': 'Right Elbow/Forearm CT (Without Contrast)',
+            'ANGIO-TC ARTO INFERIORE DX': 'CT Angiography of the Right Lower Limb',
+            'ANGIO-TC ARTO INFERIORE SX': 'CT Angiography of the Left Lower Limb',
+            'OTHER_EXAMS': 'Other Exams'
+        };
 
-    const exams = [
-      { it: 'TC CEREBRALE (SENZA MDC)', en: 'Brain CT (Without Contrast)' },
-      { it: 'TC COLONNA LOMBO-SACRALE (SENZA MDC)', en: 'Lumbosacral Spine CT (Without Contrast)' },
-      { it: 'TC COLONNA CERVICALE (SENZA MDC)', en: 'Cervical Spine CT (Without Contrast)' },
-      { it: 'TC CRANIO (SENZA MDC) _SELLA TURCICA, ORBITE_', en: 'Skull CT (Without Contrast) - Sella/Orbits' },
-      { it: 'TC TORACE (SENZA MDC)', en: 'Chest CT (Without Contrast)' },
-      { it: 'TC GOMITO/AVAMBRACCIO DX (SENZA MDC)', en: 'Elbow/Forearm CT Right (Without Contrast)' },
-      { it: 'TC MASSICCIO FACCIALE (SENZA MDC)', en: 'Facial Bones CT (Without Contrast)' },
-      { it: 'TC ADDOME COMPLETO (SENZA E CON MDC)', en: 'Full Abdomen CT (With and Without Contrast)' },
-      { it: 'ANGIO-TC TRONCHI SOVRAORTICI', en: 'Angio-CT of Supra-Aortic Trunks' },
-      { it: 'ANGIO-TC INTRACRANICO', en: 'Intracranial Angio-CT' },
-      { it: 'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)', en: 'Pelvis and Sacroiliac Joints CT (Without Contrast)' },
-      { it: 'ANGIO-TC ARTO INFERIORE DX', en: 'Lower Limb Angio-CT Right' },
-      { it: 'ANGIO-TC ARTO INFERIORE SX', en: 'Lower Limb Angio-CT Left' },
-      { it: 'TC CEREBRALE (SENZA E CON MDC)', en: 'Brain CT (With and Without Contrast)' },
-      { it: 'TC TORACE (SENZA E CON MDC)', en: 'Chest CT (With and Without Contrast)' },
-      { it: 'TC ADDOME COMPLETO (SENZA MDC)', en: 'Full Abdomen CT (Without Contrast)' },
-      { it: 'TC COLLO (SENZA E CON MDC)', en: 'Neck CT (With and Without Contrast)' },
-      { it: 'TC COLONNA DORSALE (SENZA MDC)', en: 'Thoracic Spine CT (Without Contrast)' },
-      { it: 'OTHER_EXAMS', en: 'Other exams' }
-    ];
+        const examCategories = {
+            'head': {
+                icon: '🧠',
+                name: 'Head / Brain / Skull',
+                exams: [
+                    'TC CEREBRALE (SENZA MDC)',
+                    'TC CEREBRALE (SENZA E CON MDC)',
+                    'TC CRANIO (SENZA MDC) SELLA TURCICA, ORBITE',
+                    'TC MASSICCIO FACCIALE (SENZA MDC)',
+                    'ANGIO-TC INTRACRANICO'
+                ]
+            },
+            'spine': {
+                icon: '🦴',
+                name: 'Spine',
+                exams: [
+                    'TC COLONNA CERVICALE (SENZA MDC)',
+                    'TC COLONNA DORSALE (SENZA MDC)',
+                    'TC COLONNA LOMBO-SACRALE (SENZA MDC)'
+                ]
+            },
+            'neck': {
+                icon: '🧍‍♂️',
+                name: 'Neck',
+                exams: [
+                    'TC COLLO (SENZA E CON MDC)',
+                    'ANGIO-TC TRONCHI SOVRAORTICI'
+                ]
+            },
+            'chest': {
+                icon: '🫁',
+                name: 'Chest / Thorax',
+                exams: [
+                    'TC TORACE (SENZA MDC)',
+                    'TC TORACE (SENZA E CON MDC)'
+                ]
+            },
+            'abdomen': {
+                icon: '🩻',
+                name: 'Abdomen / Pelvis',
+                exams: [
+                    'TC ADDOME COMPLETO (SENZA MDC)',
+                    'TC ADDOME COMPLETO (SENZA E CON MDC)',
+                    'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)'
+                ]
+            },
+            'limbs': {
+                icon: '🦵',
+                name: 'Upper / Lower Limbs',
+                exams: [
+                    'TC GOMITO/AVAMBRACCIO DX (SENZA MDC)',
+                    'ANGIO-TC ARTO INFERIORE DX',
+                    'ANGIO-TC ARTO INFERIORE SX'
+                ]
+            },
+            'other': {
+                icon: '❓',
+                name: 'Other',
+                exams: [
+                    'OTHER_EXAMS'
+                ]
+            }
+        };
 
-    function generateForm() {
-      const n = parseInt(document.getElementById('numPatients').value);
-      if (!n || n < 1 || n > 100) {
-        alert('Please enter a valid number of patients (1–100)');
-        return;
-      }
+        // Database pazienti 
+        const patientDatabase = [{gender: 0,
+      age: 53,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 95,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1, age: 59, type: 1, exams: ['OTHER_EXAMS'], numExams: 1},
+     {gender: 1,
+      age: 21,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)', 'OTHER_EXAMS'],
+      numExams: 2},
+     {gender: 0,
+      age: 82,
+      type: 0,
+      exams: ['ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC CEREBRALE (SENZA E CON MDC)'],
+      numExams: 3},
+     {gender: 1,
+      age: 59,
+      type: 0,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+       'TC TORACE (SENZA E CON MDC)',
+       'OTHER_EXAMS'],
+      numExams: 9},
+     {gender: 1,
+      age: 54,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 72,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 44,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 62,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 67,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 0,
+      age: 91,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 2},
+     {gender: 0,
+      age: 86,
+      type: 1,
+      exams: ['TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 54,
+      type: 1,
+      exams: ['TC TORACE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 91,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 32,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 78,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 61,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'TC TORACE (SENZA E CON MDC)'],
+      numExams: 4},
+     {gender: 0,
+      age: 75,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 87,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 48,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 79,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 23,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 76,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 20,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 46,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 30,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 66,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 51,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 83,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 78,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 69,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 2},
+     {gender: 0,
+      age: 61,
+      type: 0,
+      exams: ['TC MASSICCIO FACCIALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 91,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 6},
+     {gender: 0,
+      age: 92,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 62,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)', 'TC MASSICCIO FACCIALE (SENZA MDC)'],
+      numExams: 2},
+     {gender: 1,
+      age: 46,
+      type: 0,
+      exams: ['ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC CEREBRALE (SENZA E CON MDC)'],
+      numExams: 3},
+     {gender: 1,
+      age: 44,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'TC TORACE (SENZA E CON MDC)'],
+      numExams: 2},
+     {gender: 0,
+      age: 36,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 79,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 81,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)', 'ANGIO-TC INTRACRANICO'],
+      numExams: 2},
+     {gender: 0,
+      age: 72,
+      type: 1,
+      exams: ['TC TORACE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 72,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0, age: 33, type: 1, exams: ['OTHER_EXAMS'], numExams: 1},
+     {gender: 1,
+      age: 50,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 46,
+      type: 1,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'TC MASSICCIO FACCIALE (SENZA MDC)',
+       'TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+       'TC TORACE (SENZA E CON MDC)',
+       'OTHER_EXAMS'],
+      numExams: 9},
+     {gender: 1,
+      age: 71,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 55,
+      type: 1,
+      exams: ['ANGIO-TC ARTO INFERIORE DX'],
+      numExams: 1},
+     {gender: 1,
+      age: 64,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 88,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 86,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 76,
+      type: 1,
+      exams: ['ANGIO-TC ARTO INFERIORE SX'],
+      numExams: 1},
+     {gender: 0,
+      age: 84,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 57,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 47,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+       'TC TORACE (SENZA E CON MDC)',
+       'OTHER_EXAMS'],
+      numExams: 11},
+     {gender: 1,
+      age: 51,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 68,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 54,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 69,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 61,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 83,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 97,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 37,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 66,
+      type: 1,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0, age: 75, type: 1, exams: ['OTHER_EXAMS'], numExams: 1},
+     {gender: 1,
+      age: 69,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 81,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 71,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 22,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 1,
+      age: 74,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 24,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 79,
+      type: 1,
+      exams: ['TC CEREBRALE (SENZA MDC)', 'OTHER_EXAMS'],
+      numExams: 2},
+     {gender: 0,
+      age: 84,
+      type: 1,
+      exams: ['TC TORACE (SENZA MDC)', 'TC ADDOME COMPLETO (SENZA MDC)'],
+      numExams: 2},
+     {gender: 0,
+      age: 79,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 86,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)', 'OTHER_EXAMS'],
+      numExams: 4},
+     {gender: 1,
+      age: 43,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 48,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 81,
+      type: 1,
+      exams: ['TC TORACE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 35,
+      type: 0,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+       'TC TORACE (SENZA E CON MDC)',
+       'OTHER_EXAMS'],
+      numExams: 9},
+     {gender: 1,
+      age: 62,
+      type: 0,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+       'TC TORACE (SENZA E CON MDC)',
+       'OTHER_EXAMS'],
+      numExams: 9},
+     {gender: 1,
+      age: 40,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 99,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 34,
+      type: 1,
+      exams: ['TC TORACE (SENZA MDC)', 'OTHER_EXAMS'],
+      numExams: 2},
+     {gender: 0,
+      age: 22,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 86,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 44,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3},
+     {gender: 0,
+      age: 89,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 82,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 76,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 0,
+      age: 36,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 6},
+     {gender: 0,
+      age: 83,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 72,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 1},
+     {gender: 1,
+      age: 39,
+      type: 0,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)',
+       'TC TORACE (SENZA E CON MDC)',
+       'OTHER_EXAMS'],
+      numExams: 9},
+     {gender: 0, age: 49, type: 0, exams: ['OTHER_EXAMS'], numExams: 1},
+     {gender: 0,
+      age: 64,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)'],
+      numExams: 2},
+     {gender: 1,
+      age: 55,
+      type: 1,
+      exams: ['TC ADDOME COMPLETO (SENZA E CON MDC)',
+       'TC TORACE (SENZA E CON MDC)'],
+      numExams: 2},
+     {gender: 1,
+      age: 67,
+      type: 1,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO',
+       'TC TORACE (SENZA E CON MDC)'],
+      numExams: 4},
+     {gender: 1,
+      age: 27,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)'],
+      numExams: 1},
+     {gender: 1, age: 87, type: 1, exams: ['OTHER_EXAMS'], numExams: 1},
+     {gender: 1,
+      age: 75,
+      type: 0,
+      exams: ['TC CEREBRALE (SENZA MDC)',
+       'ANGIO-TC TRONCHI SOVRAORTICI',
+       'ANGIO-TC INTRACRANICO'],
+      numExams: 3}];
 
-      const container = document.getElementById('formContainer');
-      container.innerHTML = ''; // Clear previous forms
+        function getRandomPatientData() {
+            const patient = patientDatabase[Math.floor(Math.random() * patientDatabase.length)];
+            const validExams = patient.exams.filter(exam => PYTHON_EXAMS_LIST.includes(exam));
+            
+            return {
+                gender: patient.gender,
+                age: patient.age,
+                type: patient.type,
+                exams: validExams,
+                numExams: validExams.length
+            };
+        }
 
-      for (let i = 0; i < n; i++) {
-        const div = document.createElement('div');
-        div.className = 'patient-form';
-        div.innerHTML = `
-          <h3>Patient ${i + 1}</h3>
+        function createExamCheckboxes(patientIndex, selectedExams = []) {
+            let html = '';
+            
+            Object.keys(examCategories).forEach(categoryKey => {
+                const category = examCategories[categoryKey];
+                html += `
+                    <div class="exam-category">
+                        <div class="category-header">${category.icon} ${category.name}</div>
+                `;
+                
+                category.exams.forEach(examIT => {
+                    if (!PYTHON_EXAMS_LIST.includes(examIT)) {
+                        console.warn(`Esame ${examIT} non trovato nella lista Python!`);
+                        return;
+                    }
+                    
+                    const examEN = EXAM_TRANSLATIONS[examIT] || examIT;
+                    const isChecked = selectedExams.includes(examIT) ? 'checked' : '';
+                    
+                    html += `
+                        <div class="exam-checkbox">
+                            <input type="checkbox" 
+                                   id="exam_${patientIndex}_${examIT.replace(/[\s()]/g, '_')}" 
+                                   name="pazienti[${patientIndex}][esami][]" 
+                                   value="${examIT}" 
+                                   ${isChecked}
+                                   onchange="updateExamCount(${patientIndex})">
+                            <label for="exam_${patientIndex}_${examIT.replace(/[\s()]/g, '_')}">${examEN}</label>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            return html;
+        }
 
-          <label>Gender:</label>
-          <select name="pazienti[${i}][sesso]">
-            <option value="1">Male</option>
-            <option value="0">Female</option>
-            <option value="-1">Unspecified</option>
-          </select>
+        function updateExamCount(patientIndex) {
+            const checkboxes = document.querySelectorAll(`input[name="pazienti[${patientIndex}][esami][]"]:checked`);
+            const countInput = document.querySelector(`input[name="pazienti[${patientIndex}][numero_esami]"]`);
+            if (countInput) {
+                countInput.value = checkboxes.length;
+            }
+        }
 
-          <label>Department:</label>
-          <select name="pazienti[${i}][dipartimento]">
-            ${departments.map(dep => `<option value="${dep.it}">${dep.en}</option>`).join('')}
-          </select>
+        function generateForm() {
+            const n = parseInt(document.getElementById('numPatients').value);
+            if (!n || n < 15 || n > 100) {
+                alert('Please enter a valid number of patients (15–100)');
+                return;
+            }
 
-          <label>Scan Type:</label>
-          <select name="pazienti[${i}][tipo]">
-            <option value="1">Body</option>
-            <option value="0">Neuro</option>
-          </select>
+            const container = document.getElementById('formContainer');
+            container.innerHTML = '';
 
-          <label>Exams:</label>
-          <select name="pazienti[${i}][esami][]" multiple>
-            ${exams.map(ex => `<option value="${ex.it}">${ex.en}</option>`).join('')}
-          </select>
+            for (let i = 0; i < n; i++) {
+                const patientData = getRandomPatientData();
+                
+                // console.log(`Patient ${i + 1} data:`, patientData);  
+                
+                const div = document.createElement('div');
+                div.className = 'patient-form fade-in';
+                div.innerHTML = `
+                    <h3>Patient ${i + 1}</h3>
 
-          <label>Age:</label>
-          <input type="number" name="pazienti[${i}][eta]" min="0" required>
+                    <label>Gender:</label>
+                    <select name="pazienti[${i}][sesso]" required>
+                        <option value="1" ${patientData.gender === 1 ? 'selected' : ''}>Male</option>
+                        <option value="0" ${patientData.gender === 0 ? 'selected' : ''}>Female</option>
+                        <option value="-1" ${patientData.gender === -1 ? 'selected' : ''}>Unspecified</option>
+                    </select>
 
-          <label>Number of exams:</label>
-          <input type="number" name="pazienti[${i}][numero_esami]" min="1" required>
-        `;
-        container.appendChild(div);
-      }
+                    <label>Age:</label>
+                    <input type="number" name="pazienti[${i}][eta]" min="1" max="120" value="${patientData.age}" required>
 
-      // Show the submit button
-      document.getElementById('submitBtn').style.display = 'inline-block';
-      document.getElementById('submitDisclaimer').style.display = 'block';
+                    <label>Scan Type:</label>
+                    <select name="pazienti[${i}][tipo]" required>
+                        <option value="1" ${patientData.type === 1 ? 'selected' : ''}>Body</option>
+                        <option value="0" ${patientData.type === 0 ? 'selected' : ''}>Neuro</option>
+                    </select>
 
-    }
+                    <label>Exams:</label>
+                    ${createExamCheckboxes(i, patientData.exams)}
 
-  </script>
+                    <label>Number of exams:</label>
+                    <input type="number" name="pazienti[${i}][numero_esami]" min="0" value="${patientData.numExams}" readonly>
+                `;
+                container.appendChild(div);
+            }
+
+            document.getElementById('autoGenerateInfo').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'flex';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('submitDisclaimer').style.display = 'block';
+        }
+
+        function regeneratePatients() {
+            generateForm();
+        }
+
+        function validateForm() {
+            const patientForms = document.querySelectorAll('.patient-form');
+            let isValid = true;
+
+            patientForms.forEach((form, index) => {
+                const checkboxes = form.querySelectorAll(`input[name="pazienti[${index}][esami][]"]:checked`);
+                if (checkboxes.length === 0) {
+                    alert(`Patient ${index + 1} must have at least one exam selected.`);
+                    isValid = false;
+                    return false;
+                }
+            });
+
+            return isValid;
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            Object.keys(examCategories).forEach(categoryKey => {
+                const category = examCategories[categoryKey];
+                category.exams.forEach(exam => {
+                    if (!PYTHON_EXAMS_LIST.includes(exam)) {
+                        console.error(`ERRORE: Esame "${exam}" nella categoria "${categoryKey}" non è presente in PYTHON_EXAMS_LIST!`);
+                    }
+                });
+            });
+            
+            patientDatabase.forEach((patient, index) => {
+                patient.exams.forEach(exam => {
+                    if (!PYTHON_EXAMS_LIST.includes(exam)) {
+                        console.error(`ERRORE: Paziente ${index} ha esame "${exam}" che non è in PYTHON_EXAMS_LIST!`);
+                    }
+                });
+            });
+            
+            console.log('Validazione completata. Lista esami Python:', PYTHON_EXAMS_LIST);
+        });
+
+    </script>
 </body>
 </html>
