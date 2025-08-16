@@ -278,7 +278,45 @@
             <strong>Disclaimer:</strong> This is a simplified version of the machine learning algorithm. The model has been trained on data specific to Policlinico San Matteo, so its performance might be lower than what could be achieved in real-world applications.
         </div>
 
-        <!-- Patient Information Table -->
+        <script>
+        const EXAM_TRANSLATIONS = {
+            'TC CEREBRALE (SENZA MDC)': 'Brain CT (Without Contrast)',
+            'TC CEREBRALE (SENZA E CON MDC)': 'Brain CT (With and Without Contrast)',
+            'TC CRANIO (SENZA MDC) SELLA TURCICA, ORBITE': 'Skull CT (Without Contrast) – Sella Turcica, Orbits',
+            'TC MASSICCIO FACCIALE (SENZA MDC)': 'Facial Bones CT (Without Contrast)',
+            'ANGIO-TC INTRACRANICO': 'Intracranial CT Angiography',
+            'TC COLONNA CERVICALE (SENZA MDC)': 'Cervical Spine CT (Without Contrast)',
+            'TC COLONNA DORSALE (SENZA MDC)': 'Thoracic Spine CT (Without Contrast)',
+            'TC COLONNA LOMBO-SACRALE (SENZA MDC)': 'Lumbosacral Spine CT (Without Contrast)',
+            'TC COLLO (SENZA E CON MDC)': 'Neck CT (With and Without Contrast)',
+            'ANGIO-TC TRONCHI SOVRAORTICI': 'CT Angiography of the Supra-Aortic Trunks',
+            'TC TORACE (SENZA MDC)': 'Chest CT (Without Contrast)',
+            'TC TORACE (SENZA E CON MDC)': 'Chest CT (With and Without Contrast)',
+            'TC ADDOME COMPLETO (SENZA MDC)': 'Complete Abdominal CT (Without Contrast)',
+            'TC ADDOME COMPLETO (SENZA E CON MDC)': 'Complete Abdominal CT (With and Without Contrast)',
+            'TC BACINO E ART. SACRO-ILIACHE (SENZA MDC)': 'Pelvis and Sacroiliac Joints CT (Without Contrast)',
+            'TC GOMITO/AVAMBRACCIO DX (SENZA MDC)': 'Right Elbow/Forearm CT (Without Contrast)',
+            'ANGIO-TC ARTO INFERIORE DX': 'CT Angiography of the Right Lower Limb',
+            'ANGIO-TC ARTO INFERIORE SX': 'CT Angiography of the Left Lower Limb',
+            'OTHER_EXAMS': 'Other Exams'
+        };
+
+        function translateExams() {
+            // Trova tutti gli elementi con classe exam-item
+            const examItems = document.querySelectorAll('.exam-item');
+            
+            examItems.forEach(item => {
+                const text = item.textContent.trim();
+                const examName = text.substring(2); // Rimuove "• "
+                const translatedExam = EXAM_TRANSLATIONS[examName] || examName;
+                item.textContent = '• ' + translatedExam;
+            });
+        }
+
+        // Esegui la traduzione quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', translateExams);
+        </script>
+
         {% if pazienti is not none %}
             <h2>Patient Information</h2>
             <table class="patient-info-table">

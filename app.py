@@ -70,6 +70,8 @@ def index():
 
             # Variabile occupazione massima complessiva
             z = model.add_var(var_type=CONTINUOUS)
+            zbb = model.add_var(var_type=CONTINUOUS)
+            znn = model.add_var(var_type=CONTINUOUS)
 
             # Ogni paziente in un solo giorno
             for i in range(n):
@@ -83,6 +85,8 @@ def index():
                 model += zn[j] >= xsum((1 - tipo[i]) * predizioni[i] * x[i][j] for i in range(n))
                 # Occupazione massima totale per quel giorno
                 model += z >= zb[j] + zn[j]
+                model += zbb >= zb[j] 
+                model += znn >= zn[j]
 
             # bilanciamento giornaliero tra body e neuro
             diff = [model.add_var(var_type=CONTINUOUS) for j in range(m)]
@@ -91,7 +95,7 @@ def index():
                 model += diff[j] >= zn[j] - zb[j]
 
             # Minimizzo occupazione max + penalità totale
-            model.objective = minimize(z + 0.3 * xsum(diff[j] for j in range(m)))
+            model.objective = minimize(z + zbb + znn)
 
             model.optimize(max_seconds=300)
 
