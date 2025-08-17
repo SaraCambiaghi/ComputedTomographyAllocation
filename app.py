@@ -6,6 +6,7 @@ import pickle
 from sklearn.metrics.pairwise import nan_euclidean_distances
 import math
 import random
+import os
 
 app = Flask(__name__)
 @app.route("/", methods=["GET", "POST"])
