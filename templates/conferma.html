@@ -357,7 +357,7 @@
 
             {% if random_result is not none %}
             <div class="schedule-table fade-in">
-                <h2>Even Day-by-Day Assignment</h2>
+                <h2>Even Day-by-Day Assignment Expected Results</h2>
                 
                 <table class="day-schedule-table">
                     <tr>
@@ -406,7 +406,7 @@
 
             {% if result is not none %}
             <div class="schedule-table fade-in">
-                <h2>Optimized Assignment</h2>
+                <h2>Optimized Assignment Expected Results</h2>
                 
                 <table class="day-schedule-table">
                     <tr>
@@ -458,8 +458,8 @@
         {% if employ_old is not none and employ_opt is not none %}
             {% if employ_opt <= employ_old %}
                 <div class="confronto-final fade-in">
-                    <h2 style="margin-top: 0;">Final Results Comparison</h2>
-                    <h3>Average Maximum Daily Workload (in minutes), estimated using Monte Carlo simulation.</h3>
+                    <h2 style="margin-top: 0;">Final Results Based on Simulated Real Durations</h2>
+                    <h3>Average Maximum Daily Workload (in minutes), with durations estimated using Monte Carlo simulation.</h3>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value">{{ "%.2f"|format(employ_old)}}</div>
@@ -492,7 +492,7 @@
                             {% set avg_neuro_opt = 0 %}
                         {% endif %} -->
 
-                        <h3>Average Maximum Daily Workload (in minutes) by Patient's Type, estimated using Monte Carlo simulation</h3>
+                        <h3>Average Maximum Daily Workload (in minutes) by Patient's Type, with durations estimated using Monte Carlo simulation</h3>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-value workload-body">{{ "%.2f"|format(rand_body) }}</div>
