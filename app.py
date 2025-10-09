@@ -3,7 +3,6 @@ from flask import Flask, render_template, request
 from catboost import CatBoostRegressor
 import pandas as pd
 import pickle
-from sklearn.metrics.pairwise import nan_euclidean_distances
 import math
 import random
 import os
@@ -57,22 +56,48 @@ def index():
 
         criterio = request.form.get("criterioDurata")
         
-        ## MODELLO
-        def opt_model(predizioni, tipo, m = 5):
+        ## ESAMI 
+        def round_robin_exam(predizioni, tipo):
+            n_pat = len(predizioni)
+            round_robin_assignments = []
+            costs_body = [0,0,0,0,0]
+            costs_neuro = [0,0,0,0,0]
+            day = 0
+            for pat in range(n_pat):
+                # assegno il paziente al giorno
+                round_robin_assignments.append((pat,day))
+                # aggiungo occupazione a seconda del tipo
+                if tipo[pat] == 1: 
+                    costs_body[day] += predizioni[pat]
+                elif tipo[pat] == 0:
+                    costs_neuro[day] += predizioni[pat]
+                # passo al giorno successivo
+                day += 1
+                # se finisce la settimana, ricomincio
+                if day >= 5:
+                    day = 0  
+            # calcolo occupazione totale body + neuro
+            costs = [a + b for a, b in zip(costs_neuro, costs_body)]
+            # ritorno il massimo tra i giorni e gli assignments
+            return  {
+                "z": max(costs),
+                "assignments": round_robin_assignments,
+                "occupazione_total": costs
+            }
+
+        def opt_model_exam(predizioni, tipo, m = 5):
             n = len(predizioni)  # pazienti
             model = Model()
 
             # x[i][j] = 1 se paziente i va nel giorno j
             x = [[model.add_var(var_type=BINARY) for j in range(m)] for i in range(n)]
 
-            # Occupazione massima giornaliera Body e Neuro
+            # Occupazione giornaliera Body e Neuro
             zb = [model.add_var(var_type=CONTINUOUS) for j in range(m)]
             zn = [model.add_var(var_type=CONTINUOUS) for j in range(m)]
 
             # Variabile occupazione massima complessiva
             z = model.add_var(var_type=CONTINUOUS)
-            zbb = model.add_var(var_type=CONTINUOUS)
-            znn = model.add_var(var_type=CONTINUOUS)
 
             # Ogni paziente in un solo giorno
             for i in range(n):
@@ -81,22 +106,14 @@ def index():
             # Vincoli per calcolare occupazioni giornaliere
             for j in range(m):
                 # Body
-                model += zb[j] >= xsum(tipo[i] * predizioni[i] * x[i][j] for i in range(n))
+                model += zb[j] == xsum(tipo[i] * predizioni[i] * x[i][j] for i in range(n))
                 # Neuro
-                model += zn[j] >= xsum((1 - tipo[i]) * predizioni[i] * x[i][j] for i in range(n))
-                # Occupazione massima totale per quel giorno
+                model += zn[j] == xsum((1 - tipo[i]) * predizioni[i] * x[i][j] for i in range(n))
+                # z >= occupazione totale per quel giorno
                 model += z >= zb[j] + zn[j]
-                model += zbb >= zb[j] 
-                model += znn >= zn[j]
-
-            # bilanciamento giornaliero tra body e neuro
-            diff = [model.add_var(var_type=CONTINUOUS) for j in range(m)]
-            for j in range(m):
-                model += diff[j] >= zb[j] - zn[j]
-                model += diff[j] >= zn[j] - zb[j]
 
             # Minimizzo occupazione max + penalità totale
-            model.objective = minimize(z + zbb + znn)
+            model.objective = minimize(z) 
 
             model.optimize(max_seconds=300)
 
@@ -105,107 +122,18 @@ def index():
                 for i in range(n):
                     if x[i][j].x >= 0.99:
                         assignments.append((i, j))
-
-            # Occupazioni giornaliere
+            
             occupazione_body = [zb[j].x for j in range(m)]
             occupazione_neuro = [zn[j].x for j in range(m)]
+            occupazione_total = [b + n for b, n in zip(occupazione_body, occupazione_neuro)]
 
             return {
                 "z": z.x,
                 "assignments": assignments,
-                "occupazione_body": occupazione_body,
-                "occupazione_neuro": occupazione_neuro
+                "occupazione_total": occupazione_total
             }
 
-        ## EURISTICA
-        def opt_euristic(predizioni, tipo, m = 5):
-            n = len(predizioni)
-
-            # Occupazione per giorno
-            zb = [0.0] * m  # Body
-            zn = [0.0] * m  # Neuro
-            assignments = [None] * n
-
-            # Ordina i pazienti dal più pesante al più leggero
-            pazienti = sorted(range(n), key=lambda i: predizioni[i], reverse=True)
-
-            for i in pazienti:
-                best_day = None
-                best_score = float("inf")
-
-                for j in range(m):
-                    # Stima occupazione se metto il paziente i in giorno j
-                    new_zb = zb[j] + (predizioni[i] if tipo[i] == 1 else 0)
-                    new_zn = zn[j] + (predizioni[i] if tipo[i] == 0 else 0)
-                    new_total = new_zb + new_zn
-
-                    # Occupazione massima
-                    max_total = max(zb[k] + zn[k] if k != j else new_total for k in range(m))
-
-                    # Penalizza squilibrio Body/Neuro nel giorno
-                    balance_penalty = abs(new_zb - new_zn)
-                    score = max_total + 0.3 * balance_penalty
-
-                    if score < best_score:
-                        best_score = score
-                        best_day = j
-
-                # Assegna paziente al best_day
-                assignments[i] = best_day
-                if tipo[i] == 1:
-                    zb[best_day] += predizioni[i]
-                else:
-                    zn[best_day] += predizioni[i]
-
-            # Risultati
-            z = max(zb[j] + zn[j] for j in range(m))
-            
-            return {
-                "z": z,
-                "assignments": [(i, assignments[i]) for i in range(n)],
-                "occupazione_body": zb,
-                "occupazione_neuro": zn
-            }
-
-            ## ASSEGNAMENTO ITERATIVO
-        def random_model(predizioni, tipo):
-            n_pat = len(predizioni)
-            random_assignments = []
-            costs_body = [0,0,0,0,0]
-            costs_neuro = [0,0,0,0,0]
-            day = 0
-            for pat in range(n_pat):
-                random_assignments.append((pat,day))
-                if tipo[pat] == 1: 
-                    costs_body[day] += predizioni[pat]
-                elif tipo[pat] == 0:
-                    costs_neuro[day] += predizioni[pat]
-                day += 1
-                if day >= 5:
-                    day = 0  
-            costs = [a + b for a, b in zip(costs_neuro, costs_body)]
-            return  {
-                "z": max(costs),
-                "assignments": random_assignments,
-                "occupazione_body": costs_body,
-                "occupazione_neuro": costs_neuro
-            }
-
-        ## calcolo durate ""reali""
-        with open('residui_exam.pkl', 'rb') as file:
-            residui_exam = pickle.load(file)
-        with open('residui_reporting.pkl', 'rb') as file:
-            residui_reporting = pickle.load(file)
-        
-        # aggiungo i residui
-        def compute_d_real(residui, predizioni):
-            d_real = []
-            for i in range(len(predizioni)):
-                d_real.append(predizioni[i]+random.choice(residui))
-            return d_real
-
-        # calcolo occupazione con durate reali
-        def compute_real(d_real, tipo, result, random_result):
+        def compute_real_exam(d_real, tipo, result, random_result):
             employ_rand_body = [0,0,0,0,0]
             employ_opt_body = [0,0,0,0,0]
             employ_rand_neuro = [0,0,0,0,0]
@@ -224,8 +152,116 @@ def index():
                 elif tipo[p[0]] == 1:
                     employ_rand_body[p[1]] += d_real[p[0]]
                 employ_rand[p[1]] += d_real[p[0]]
-            return max(employ_rand_body), max(employ_opt_body), max(employ_rand_neuro), max(employ_opt_neuro), max(employ_opt), max(employ_rand)
+            return max(employ_opt), max(employ_rand)
+            
+        ## REFERTAZIONE
+        def round_robin_report(predizioni, tipo):
+            n_pat = len(predizioni)
+            round_robin_assignments = []
+            costs_body = [0,0,0,0,0]
+            costs_neuro = [0,0,0,0,0]
+            day = 0
+            for pat in range(n_pat):
+                round_robin_assignments.append((pat,day))
+                if tipo[pat] == 1: 
+                    costs_body[day] += predizioni[pat]
+                elif tipo[pat] == 0:
+                    costs_neuro[day] += predizioni[pat]
+                day += 1
+                if day >= 5:
+                    day = 0  
+            costs = [max(a, b) for a, b in zip(costs_body, costs_neuro)]
+            return  {
+                "z": max(costs),
+                "assignments": round_robin_assignments,
+                "occupazione_total": costs
+            }
+
+        def opt_model_report(predizioni, tipo, m = 5):
+            n = len(predizioni)  # pazienti
+            model = Model()
+
+            # x[i][j] = 1 se paziente i va nel giorno j
+            x = [[model.add_var(var_type=BINARY) for j in range(m)] for i in range(n)]
+
+            # Occupazione giornaliera Body e Neuro
+            zb = [model.add_var(var_type=CONTINUOUS) for j in range(m)]
+            zn = [model.add_var(var_type=CONTINUOUS) for j in range(m)]
+
+            # Variabile occupazione massima complessiva
+            z = model.add_var(var_type=CONTINUOUS)
+
+            # Ogni paziente in un solo giorno
+            for i in range(n):
+                model += xsum(x[i][j] for j in range(m)) == 1
+
+            # Vincoli per calcolare occupazioni giornaliere
+            for j in range(m):
+                # Body
+                model += zb[j] == xsum(tipo[i] * predizioni[i] * x[i][j] for i in range(n))
+                # Neuro
+                model += zn[j] == xsum((1 - tipo[i]) * predizioni[i] * x[i][j] for i in range(n))
+                # z = massimo tra body e neuro di ogni giorno
+                model += z >= zn[j]
+                model += z >= zb[j]
+
+
+            # Minimizzo occupazione max + penalità totale
+            model.objective = minimize(z) 
+
+            model.optimize(max_seconds=300)
+
+            assignments = []
+            for j in range(m):
+                for i in range(n):
+                    if x[i][j].x >= 0.99:
+                        assignments.append((i, j))
+
+
+            occupazione_body = [zb[j].x for j in range(m)]
+            occupazione_neuro = [zn[j].x for j in range(m)]
+            occupazione_total = [max(b, n) for b, n in zip(occupazione_body, occupazione_neuro)]
+
+            return {
+                "z": z.x,
+                "assignments": assignments,
+                "occupazione_total": occupazione_total
+            }
+
+        ## OCCUPAZIONI CON DURATE REALI
+        def compute_real_report(d_real, tipo, result, random_result):
+            employ_rand_body = [0,0,0,0,0]
+            employ_opt_body = [0,0,0,0,0]
+            employ_rand_neuro = [0,0,0,0,0]
+            employ_opt_neuro = [0,0,0,0,0]
+            for p in result['assignments']:
+                if tipo[p[0]] == 0:
+                    employ_opt_neuro[p[1]] += d_real[p[0]]
+                elif tipo[p[0]] == 1:
+                    employ_opt_body[p[1]] += d_real[p[0]]
+            for p in random_result['assignments']:
+                if tipo[p[0]] == 0:
+                    employ_rand_neuro[p[1]] += d_real[p[0]]
+                elif tipo[p[0]] == 1:
+                    employ_rand_body[p[1]] += d_real[p[0]]
+            return max(max(employ_opt_body), max(employ_opt_neuro)), max(max(employ_rand_body), max(employ_rand_neuro))
+
+        ## calcolo durate ""reali""
+        with open('residui_exam.pkl', 'rb') as file:
+            residui_exam = pickle.load(file)
+        with open('residui_reporting.pkl', 'rb') as file:
+            residui_reporting = pickle.load(file)
         
+        # aggiungo i residui
+        def compute_d_real(residui, predizioni):
+            d_real = []
+            for i in range(len(predizioni)):
+                d_real.append(predizioni[i]+random.choice(residui))
+            return d_real
+
+
+        # calcolo occupazione con durate reali
+      
         # Inizializza le variabili prima del controllo del criterio
         predizioni = []
         d_real = []
@@ -248,26 +284,17 @@ def index():
             predizioni_reg = cat_model.predict(df_model)
             predizioni = [math.ceil(p) for p in predizioni_reg]
             # calcolo i due schedule 
-            result = opt_model(predizioni, df['Body/Neuro'].tolist()) # modello
-            # result = opt_euristic(predizioni, df['Body/Neuro'].tolist()) # euristica
-            random_result = random_model(predizioni, df['Body/Neuro'].tolist()) # baseline
+            result = opt_model_exam(predizioni, df['Body/Neuro'].tolist()) # modello
+            random_result = round_robin_exam(predizioni, df['Body/Neuro'].tolist()) # baseline
             # iniziazzo workload di ogni giorni
-            rand_body = 0
-            rand_neuro = 0
-            opt_body = 0
-            opt_neuro = 0
-            employ_opt = 0
-            employ_old = 0
+            val_opt = 0
+            val_rr = 0
             # simulo 100 scenari
             for o in range(100):
                 d_real = compute_d_real(residui_exam, predizioni)
-                employ_rand_body, employ_opt_body, employ_rand_neuro, employ_opt_neuro, max_employ_opt, max_employ_old = compute_real(d_real, df['Body/Neuro'].tolist(), result, random_result)
-                rand_body += employ_rand_body
-                rand_neuro += employ_rand_neuro
-                opt_body += employ_opt_body
-                opt_neuro += employ_opt_neuro
-                employ_opt += max_employ_opt
-                employ_old += max_employ_old
+                employ_opt, employ_rand = compute_real_exam(d_real, df['Body/Neuro'].tolist(), result, random_result)
+                val_opt += employ_opt
+                val_rr += employ_rand
 
         elif criterio == "refertazione":
             # carico il modello e sistemo le colonne
@@ -281,26 +308,18 @@ def index():
             predizioni_reg = cat_model.predict(df_model)
             predizioni = [math.ceil(p) for p in predizioni_reg]
             # calcolo i due schedule
-            result = opt_model(predizioni, df['Body/Neuro'].tolist())
+            result = opt_model_report(predizioni, df['Body/Neuro'].tolist())
             # result = opt_euristic(predizioni, df['Body/Neuro'].tolist())
-            random_result = random_model(predizioni, df['Body/Neuro'].tolist())
+            random_result = round_robin_report(predizioni, df['Body/Neuro'].tolist())
             # iniziazzo workload di ogni giorni
-            rand_body = 0
-            rand_neuro = 0
-            opt_body = 0
-            opt_neuro = 0
-            employ_opt = 0
-            employ_old = 0
+            val_opt = 0
+            val_rr = 0
             # simulo 100 scenari
             for o in range(100):
                 d_real = compute_d_real(residui_reporting, predizioni)
-                employ_rand_body, employ_opt_body, employ_rand_neuro, employ_opt_neuro, max_employ_opt, max_employ_old = compute_real(d_real, df['Body/Neuro'].tolist(), result, random_result)
-                rand_body += employ_rand_body
-                rand_neuro += employ_rand_neuro
-                opt_body += employ_opt_body
-                opt_neuro += employ_opt_neuro
-                employ_opt += max_employ_opt
-                employ_old += max_employ_old
+                employ_opt, employ_rand = compute_real_report(d_real, df['Body/Neuro'].tolist(), result, random_result)
+                val_opt += employ_opt
+                val_rr += employ_rand
 
         return render_template(
             "conferma.html",
@@ -310,12 +329,8 @@ def index():
             real_durations=d_real,
             result=result,
             random_result=random_result,
-            rand_body=rand_body / 100,
-            rand_neuro=rand_neuro / 100, 
-            employ_old = employ_old / 100, 
-            opt_body= opt_body / 100, 
-            opt_neuro= opt_neuro / 100,
-            employ_opt =employ_opt / 100
+            employ_old = val_rr / 100, 
+            employ_opt = val_opt / 100
         )
 
     return render_template("index.html")
