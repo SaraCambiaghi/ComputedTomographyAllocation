@@ -4,3 +4,4 @@ pyomo
 catboost
 scikit-learn
 mip
+numpy

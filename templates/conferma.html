@@ -318,7 +318,7 @@
         </script>
 
         {% if pazienti is not none %}
-            <h2>Patient Information</h2>
+            <h2>Patient Information and Predicted Duration</h2>
             <table class="patient-info-table">
                 <tr>
                     <th>Patient ID</th>
@@ -354,161 +354,97 @@
         <!-- Schedule Comparison -->
         <div class="schedule-comparison">
             {% set days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] %}
-
-            {% if random_result is not none %}
-            <div class="schedule-table fade-in">
-                <h2>Even Day-by-Day Assignment Expected Results</h2>
-                
+            {% if random_result is not none and result is not none %}
+            <div class="schedule-table fade-in" style="grid-column: 1 / -1;">
+                <h2>Assignment and Expected Workload Comparison</h2>
                 <table class="day-schedule-table">
                     <tr>
                         <th>Day</th>
-                        <th>Assigned Patients</th>
-                        <th>Expected Body Workload</th>
-                        <th>Expected Neuro Workload</th>
+                        <th>Assigned Patients (Sequential)</th>
+                        <th>Expected Maximum Daily Workload (Sequential)</th>
+                        <th>Assigned Patients (Optimized)</th>
+                        <th>Expected Maximum Daily Workload (Optimized)</th>
                     </tr>
                     {% for day_idx in range(5) %}
                     <tr>
                         <td><strong>{{ days[day_idx] }}</strong></td>
                         <td>
-                            {% set patients_for_day = [] %}
+                            {% set patients_for_day_rand = [] %}
                             {% for patient_id, day in random_result.assignments %}
-                                {% if day == day_idx %}
-                                    {% set _ = patients_for_day.append(patient_id) %}
-                                {% endif %}
+                                {% if day == day_idx %}{% set _ = patients_for_day_rand.append(patient_id) %}{% endif %}
                             {% endfor %}
-                            {% if patients_for_day %}
-                                {% for patient_id in patients_for_day %}
-                                    <span class="patient-badge">Patient {{ patient_id }}</span>
-                                {% endfor %}
+                            {% if patients_for_day_rand %}
+                                {% for patient_id in patients_for_day_rand %}<span class="patient-badge">Patient {{ patient_id }}</span>{% endfor %}
                             {% else %}
                                 <em>No patients assigned</em>
                             {% endif %}
                         </td>
                         <td class="workload-body">
-                            {% if random_result.occupazione_body is defined and random_result.occupazione_body|length > day_idx %}
-                                {{ "%.2f"|format(random_result.occupazione_body[day_idx]) }} min
-                            {% else %}
-                                0.00 min
-                            {% endif %}
+                            {% if random_result.occupazione_total is defined and random_result.occupazione_total|length > day_idx %}
+                                {{ "%.2f"|format(random_result.occupazione_total[day_idx]) }} min
+                            {% else %}0.00 min{% endif %}
                         </td>
-                        <td class="workload-neuro">
-                            {% if random_result.occupazione_neuro is defined and random_result.occupazione_neuro|length > day_idx %}
-                                {{ "%.2f"|format(random_result.occupazione_neuro[day_idx]) }} min
-                            {% else %}
-                                0.00 min
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            {% endif %}
-
-            {% if result is not none %}
-            <div class="schedule-table fade-in">
-                <h2>Optimized Assignment Expected Results</h2>
-                
-                <table class="day-schedule-table">
-                    <tr>
-                        <th>Day</th>
-                        <th>Assigned Patients</th>
-                        <th>Body Workload</th>
-                        <th>Neuro Workload</th>
-                    </tr>
-                    {% for day_idx in range(5) %}
-                    <tr>
-                        <td><strong>{{ days[day_idx] }}</strong></td>
                         <td>
-                            {% set patients_for_day = [] %}
+                            {% set patients_for_day_opt = [] %}
                             {% for patient_id, day in result.assignments %}
-                                {% if day == day_idx %}
-                                    {% set _ = patients_for_day.append(patient_id) %}
-                                {% endif %}
+                                {% if day == day_idx %}{% set _ = patients_for_day_opt.append(patient_id) %}{% endif %}
                             {% endfor %}
-                            {% if patients_for_day %}
-                                {% for patient_id in patients_for_day %}
-                                    <span class="patient-badge">Patient {{ patient_id }}</span>
-                                {% endfor %}
+                            {% if patients_for_day_opt %}
+                                {% for patient_id in patients_for_day_opt %}<span class="patient-badge">Patient {{ patient_id }}</span>{% endfor %}
                             {% else %}
                                 <em>No patients assigned</em>
                             {% endif %}
                         </td>
-                        <td class="workload-body">
-                            {% if result.occupazione_body is defined and result.occupazione_body|length > day_idx %}
-                                {{ "%.2f"|format(result.occupazione_body[day_idx]) }} min
-                            {% else %}
-                                0.00 min
-                            {% endif %}
-                        </td>
                         <td class="workload-neuro">
-                            {% if result.occupazione_neuro is defined and result.occupazione_neuro|length > day_idx %}
-                                {{ "%.2f"|format(result.occupazione_neuro[day_idx]) }} min
-                            {% else %}
-                                0.00 min
-                            {% endif %}
+                             {% if result.occupazione_total is defined and result.occupazione_total|length > day_idx %}
+                                {{ "%.2f"|format(result.occupazione_total[day_idx]) }} min
+                            {% else %}0.00 min{% endif %}
                         </td>
                     </tr>
                     {% endfor %}
                 </table>
+                <p style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #555;">
+                    * Sequential assignment distributes patients evenly across days, cycling from Monday to Friday.
+                </p>
             </div>
             {% endif %}
         </div>
 
         <!-- Final Comparison -->
-        {% if employ_old is not none and employ_opt is not none %}
-            {% if employ_opt <= employ_old %}
+        {% if result is not none and random_result is not none %}
+            {% if result.z <= random_result.z %}
                 <div class="confronto-final fade-in">
-                    <h2 style="margin-top: 0;">Final Results Based on Simulated Real Durations</h2>
-                    <h3>Average Maximum Daily Workload (in minutes), with durations estimated using Monte Carlo simulation.</h3>
+                    <h2 style="margin-top: 0;">Workload Summary</h2>
+                    <h3>Maximum Expected Weekly Workload (in minutes)</h3>
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-value">{{ "%.2f"|format(employ_old)}}</div>
-                            <div class="stat-label">Classic Method</div>
+                            <div class="stat-value">{{ "%.2f"|format(random_result.z)}}</div>
+                            <div class="stat-label">Sequential Allocation</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value">{{ "%.2f"|format(employ_opt) }}</div>
-                            <div class="stat-label">Optimized Method</div>
+                            <div class="stat-value">{{ "%.2f"|format(result.z) }}</div>
+                            <div class="stat-label">Optimized Allocation</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value">{{ "%.1f"|format(((employ_old - employ_opt) / employ_old * 100) if employ_old > 0 else 0) }}%</div>
-                            <div class="stat-label">Workload Reduction</div>
+                            <div class="stat-value">{{ "%.1f"|format(((random_result.z - result.z) / random_result.z * 100) if random_result.z > 0 else 0) }}%</div>
+                            <div class="stat-label">Weekly Improvement</div>
                         </div>
                     </div>
 
-                    {% if random_result is not none and result is not none %}
-                        <!-- {% if random_result.occupazione_body is defined and random_result.occupazione_neuro is defined %}
-                            {% set avg_body_classic = (random_result.occupazione_body | sum) / (random_result.occupazione_body | length) %}
-                            {% set avg_neuro_classic = (random_result.occupazione_neuro | sum) / (random_result.occupazione_neuro | length) %}
-                        {% else %}
-                            {% set avg_body_classic = 0 %}
-                            {% set avg_neuro_classic = 0 %}
-                        {% endif %}
-                        
-                        {% if result.occupazione_body is defined and result.occupazione_neuro is defined %}
-                            {% set avg_body_opt = (result.occupazione_body | sum) / (result.occupazione_body | length) %}
-                            {% set avg_neuro_opt = (result.occupazione_neuro | sum) / (result.occupazione_neuro | length) %}
-                        {% else %}
-                            {% set avg_body_opt = 0 %}
-                            {% set avg_neuro_opt = 0 %}
-                        {% endif %} -->
-
-                        <h3>Average Maximum Daily Workload (in minutes) by Patient's Type, with durations estimated using Monte Carlo simulation</h3>
+                    {% if employ_old is not none and employ_opt is not none %}
+                        <h3>Maximum Weekly Workload (minutes) Obtained via Monte Carlo Simulation of Durations</h3>
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <div class="stat-value workload-body">{{ "%.2f"|format(rand_body) }}</div>
-                                <div class="stat-label">Classic Method<br>Body Patients</div>
+                                <div class="stat-value workload-body">{{ "%.2f"|format(employ_old) }}</div>
+                                <div class="stat-label">Sequential Allocation</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-value workload-neuro">{{ "%.2f"|format(rand_neuro) }}</div>
-                                <div class="stat-label">Classic Method<br>Neuro Patients</div>
+                                <div class="stat-value workload-neuro">{{ "%.2f"|format(employ_opt) }}</div>
+                                <div class="stat-label">Optimized Allocation</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-value workload-body">{{ "%.2f"|format(opt_body) }}</div>
-                                <div class="stat-label">Optimized Method<br>Body Patients</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value workload-neuro">{{ "%.2f"|format(opt_neuro) }}</div>
-                                <div class="stat-label">Optimized Method<br>Neuro Patients</div>
+                                <div class="stat-value">{{ "%.1f"|format(((employ_old - employ_opt) / employ_old * 100) if employ_old > 0 else 0) }}%</div>
+                                <div class="stat-label">Weekly Improvement</div>
                             </div>
                         </div>
                     {% endif %}
