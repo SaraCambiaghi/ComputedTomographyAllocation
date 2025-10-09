@@ -1147,6 +1147,20 @@
             });
             
             console.log('Validazione completata. Lista esami Python:', PYTHON_EXAMS_LIST);
+            
+            // Impedisce la sottomissione del form con Invio e chiama generateForm se il focus è su numPatients
+            document.getElementById('patientsForm').addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    // Controlla se il target è un input per evitare di bloccare altri elementi come i bottoni
+                    if (event.target.tagName.toLowerCase() === 'input') {
+                        event.preventDefault();
+                        // Se il focus è sul campo del numero di pazienti, genera i form
+                        if (event.target.id === 'numPatients') {
+                            generateForm();
+                        }
+                    }
+                }
+            });
         });
 
     </script>

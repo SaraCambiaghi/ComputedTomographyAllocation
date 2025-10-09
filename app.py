@@ -255,8 +255,9 @@ def index():
         # aggiungo i residui
         def compute_d_real(residui, predizioni):
             d_real = []
+            residui_list = residui.tolist()
             for i in range(len(predizioni)):
-                d_real.append(predizioni[i]+random.choice(residui))
+                d_real.append(predizioni[i]+random.choice(residui_list))
             return d_real
 
 
