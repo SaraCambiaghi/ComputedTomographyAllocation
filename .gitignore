@@ -59,4 +59,5 @@ venv.bak/
 
 # Prediction files
 *.pkl
-test_*.py
+test_exam.py
+test_reporting.py
