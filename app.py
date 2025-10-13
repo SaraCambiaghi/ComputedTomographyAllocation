@@ -331,7 +331,8 @@ def index():
             result=result,
             random_result=random_result,
             employ_old = val_rr / 100, 
-            employ_opt = val_opt / 100
+            employ_opt = val_opt / 100,
+            criterio_durata=criterio
         )
 
     return render_template("index.html")

@@ -328,7 +328,7 @@
                     <th>Exams List</th>
                     <th>Number of Exams</th>
                     {% if predizioni is not none %}
-                    <th>Predicted Duration</th>
+                    <th>{% if criterio_durata == 'esami' %}Predicted CT Duration{% else %}Predicted Reporting Duration{% endif %}</th>
                     {% endif %}
                 </tr>
                 {% for i in range(pazienti|length) %}
@@ -361,9 +361,9 @@
                     <tr>
                         <th>Day</th>
                         <th>Assigned Patients (Sequential)</th>
-                        <th>Expected Maximum Daily Workload (Sequential)</th>
+                        <th>{% if criterio_durata == 'esami' %}Expected CTs Daily Workload (Sequential){% else %}Expected Radiologists Daily Workload (Sequential){% endif %}</th>
                         <th>Assigned Patients (Optimized)</th>
-                        <th>Expected Maximum Daily Workload (Optimized)</th>
+                        <th>{% if criterio_durata == 'esami' %}Expected CTs Daily Workload (Optimized){% else %}Expected Radiologists Daily Workload (Optimized){% endif %}</th>
                     </tr>
                     {% for day_idx in range(5) %}
                     <tr>
@@ -414,8 +414,8 @@
         {% if result is not none and random_result is not none %}
             {% if result.z <= random_result.z %}
                 <div class="confronto-final fade-in">
-                    <h2 style="margin-top: 0;">Workload Summary</h2>
-                    <h3>Maximum Expected Weekly Workload (in minutes)</h3>
+                    <h2 style="margin-top: 0;">{% if criterio_durata == 'esami' %}CTs Workload Summary{% else %}Radiologists Workload Summary{% endif %}</h2>
+                    <h3>{% if criterio_durata == 'esami' %}Maximum Expected CTs Workload (in minutes){% else %}Maximum Expected Radiologists Workload (in minutes){% endif %}</h3>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value">{{ "%.2f"|format(random_result.z)}}</div>
@@ -432,7 +432,7 @@
                     </div>
 
                     {% if employ_old is not none and employ_opt is not none %}
-                        <h3>Maximum Weekly Workload (minutes) Obtained via Monte Carlo Simulation of Durations</h3>
+                        <h3>{% if criterio_durata == 'esami' %}Maximum CTs Weekly Workload (minutes) Obtained via Monte Carlo Simulation of Durations{% else %}Maximum Radiologists Weekly Workload (minutes) Obtained via Monte Carlo Simulation of Durations{% endif %}</h3>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-value workload-body">{{ "%.2f"|format(employ_old) }}</div>
