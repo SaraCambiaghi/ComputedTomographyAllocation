@@ -969,9 +969,18 @@
             const patient = patientDatabase[Math.floor(Math.random() * patientDatabase.length)];
             const validExams = patient.exams.filter(exam => PYTHON_EXAMS_LIST.includes(exam));
             
+            // Add a random variation to the age
+            const ageVariation = Math.floor(Math.random() * 9) - 4; // Generates a random integer between -4 and 4
+            let newAge = patient.age + ageVariation;
+
+            // Ensure age is not less than 1
+            if (newAge < 1) {
+                newAge = 1;
+            }
+            
             return {
                 gender: patient.gender,
-                age: patient.age,
+                age: newAge,
                 type: patient.type,
                 exams: validExams,
                 numExams: validExams.length
