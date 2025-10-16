@@ -1,41 +1,67 @@
-# CT Exam Scheduler
+# Computed Tomography Exam Scheduler
 
-This repository accompanies the article *"Computed Tomography Allocation in an Emergency Department: Comparison of Machine Learning and Deep Learning Methods as Support Tools."*
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.0%2B-orange.svg)](https://flask.palletsprojects.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg?logo=docker)](https://www.docker.com/)
 
-It provides a toy example demonstrating how predictions made with machine learning techniques can assist in balancing radiology workload across weekdays.
+This repository contains the supporting code for the article *"Optimizing CT scheduling in the Emergency Department: development and simulation of a machine learning scheduling tool."*
 
-## Features
+It provides a simple demonstration of how predictions from machine learning techniques can help balance the radiology workload on weekdays.
 
-- Dynamic form generation based on the number of patients and the selected balancing criterion  
-- Selectable scan types, departments, and patient/exam details  
-- Basic optimization to balance radiology workload  
-- Visualization of classic vs. optimized scheduling, using both expected and simulated outcomes via Monte Carlo methods  
+---
 
-## Getting Started
+## Try the App Online
 
-1. Download and install Docker Desktop:  
-   👉 [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+You can try the application directly online without any installation by visiting the following link:
 
-2. Clone the repository: from the terminal, run
-   ```bash
-   git clone https://github.com/SaraCambiaghi/ComputerTomographyAllocation.git
-or download this folder as a ZIP file and unzip it
+**👉 [https://computedtomographyallocation.onrender.com](https://computedtomographyallocation.onrender.com)**
 
-4. Build the Docker image:  
-  Start Docker Desktop, open your terminal, navigate to the downloaded folder, and run:
-   ```bash
-   docker build -t my-app .
-(You can replace my-app with any name you prefer for the image.)
+---
 
-3. Run the container and start the app:
-     ```bash
-     docker run -p 5000:5000 my-app
-4. Open your browser and go to:
-   
-   👉 [http://localhost:5000](http://localhost:5000)
+## Key Features
 
-## Alternatively, to try the tool directly:
-go to 👉 [https://computedtomographyallocation.onrender.com](https://computedtomographyallocation.onrender.com)
+- **Dynamic Forms**: Generates forms based on the number of patients and the selected balancing criterion.
+- **Exam Customization**: Allows selection of scan type, department, and patient/exam details.
+- **Optimization**: An algorithm to balance CT scan and radiologists' workload.
+- **Visualization**: Compares classic vs. optimized scheduling, using both expected results and Monte Carlo simulations.
 
+---
 
+## Local Installation and Setup (with Docker)
 
+To run the application on your computer, follow these steps:
+
+1.  **Install Docker Desktop**:  
+    Download it from [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop).
+
+2.  **Clone the Repository**:
+    Open a terminal and run the following command:
+    ```bash
+    git clone https://github.com/SaraCambiaghi/ComputerTomographyAllocation.git
+    ```
+    Alternatively, you can download the repository as a ZIP file and unzip it.
+
+3.  **Build the Docker Image**:  
+    Make sure Docker Desktop is running. Open your terminal, navigate to the project folder, and run:
+    ```bash
+    docker build -t ct-scheduler-app .
+    ```
+    *(You can replace `ct-scheduler-app` with a name of your choice.)*
+
+4.  **Run the Container**:
+    Run the Docker container with the following command:
+    ```bash
+    docker run -p 5000:5000 ct-scheduler-app
+    ```
+
+5.  **Access the Application**:  
+    Open your browser and go to [http://localhost:5000](http://localhost:5000).
+
+---
+
+## Technologies Used
+
+- **Backend**: Python, Flask
+- **Machine Learning**: CatBoost
+- **Optimization**: Python-MIP
+- **Containerization**: Docker
